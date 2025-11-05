@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>おかわり</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<header>
+    <div class="jp1">モヒョン</div>
+    <div class="jp2">おかわり</div>
+</header>
+
+<div class="wrap">
+    <div class="card">
+        <h1>로그인</h1>
+        <div id="err" class="error">이메일 또는 비밀번호가 올바르지 않습니다.</div>
+        <form id="loginForm">
+            <label for="email">이메일</label>
+            <input id="email" type="email" autocomplete="email" required placeholder="you@example.com"/>
+
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" autocomplete="current-password" required placeholder="••••"/>
+
+            <button id="submitBtn" class="btn" type="submit">로그인</button>
+        </form>
+        <div id="loginStatus" style="display:none; margin-top:12px;"></div>
+
+        <div class="hint">아직 회원이 아니신가요? <a href="/signup.html">회원가입</a></div>
+    </div>
+</div>
+<footer>© 2025 おかわり. All Rights Reserved.</footer>
+<script th:src="@{/js/login.js}"></script>
+</body>
+</html>
