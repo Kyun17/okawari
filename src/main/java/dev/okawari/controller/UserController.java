@@ -1,5 +1,6 @@
 package dev.okawari.controller;
 
+<<<<<<< HEAD
 import dev.okawari.dto.LoginRequest;
 import dev.okawari.dto.UserDTO;
 import dev.okawari.entity.User;
@@ -45,5 +46,6 @@ public class UserController {
         }
         return ResponseEntity.ok(UserDTO.fromUser(user));
     }
-
 }
+
+

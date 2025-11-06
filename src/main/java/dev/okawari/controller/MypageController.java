@@ -1,5 +1,5 @@
 package dev.okawari.controller;
 
-public class RestaurantController {
+public class MyPageController {
 
 }
