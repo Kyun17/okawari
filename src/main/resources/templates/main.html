@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おかわり - 메인</title>
+
+    <style>
+        /* --- 1. 공통 스타일 --- */
+        body, h1, h2, p, ul, li, form, button, input {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa; color: #212529; min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        /* --- 2. 헤더 / 푸터 공통 컨테이너 --- */
+        .header-footer-container {
+            width: 100%; background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .footer-container {
+            width: 100%; background-color: #ffffff;
+            border-top: 1px solid #dee2e6; margin-top: auto;
+        }
+        .header-footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 30px 20px;
+            text-align: center; color: #adb5bd; font-size: 14px;
+        }
+
+        /* --- 3. 헤더 (로고, 버튼) --- */
+        .header .logo {
+            font-size: 28px; font-weight: bold; text-decoration: none; outline: none;
+        }
+        .header .logo .logo-yummy { color: #04448b; }
+        .header .logo .logo-log { color: #c19041; }
+        .header .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 버튼 사이 간격 */
+        }
+        .header .auth-buttons button {
+            background-color: transparent; border: 1px solid #04448b; color: #04448b;
+            padding: 8px 16px; border-radius: 5px; cursor: pointer;
+            font-size: 14px; font-weight: 500;
+        }
+        .header .auth-buttons button:hover { background-color: #04448b; color: #fff; }
+        /* (신규) 로그아웃 버튼 (POST 폼) */
+        .header .auth-buttons form { margin: 0; }
+        .header .user-greeting {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* --- 4. 메인 컨텐츠 (검색, 필터, 리스트) --- */
+        .main-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* 검색창 */
+        .search-bar { width: 100%; margin-bottom: 30px; }
+        .search-bar input {
+            width: 100%; padding: 15px; font-size: 16px;
+            border: 1px solid #ced4da; border-radius: 8px;
+        }
+
+        /* 카테고리 필터
+          - <button>에서 <a> 태그로 변경되었으므로, CSS 선택자를 'a'로 수정합니다.
+        */
+        .category-filters {
+            display: flex; gap: 15px; margin-bottom: 40px;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .category-filters a { /* (수정) 'button' -> 'a' */
+            background-color: #fff; border: 1px solid #dee2e6;
+            width: auto; padding: 10px 20px; /* 텍스트 버튼용 패딩 */
+            border-radius: 20px; /* 둥근 사각형 */
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 15px; font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none; /* (추가) 링크 밑줄 제거 */
+            color: #212529; /* (추가) 기본 텍스트 색상 */
+        }
+        .category-filters a:hover { /* (수정) 'button' -> 'a' */
+            transform: translateY(-2px);
+            text-decoration: none; /* (추가) */
+        }
+        /* (수정) 'a' 태그에 'active' 클래스가 붙도록 수정 */
+        .category-filters a.active, .category-filters a:focus {
+            background-color: #04448b; color: #fff; border-color: #04448b;
+            outline: none; box-shadow: 0 4px 8px rgba(4, 68, 139, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* 맛집 리스트 (2열 카드 뷰) */
+        .restaurant-grid-container { padding: 0 5%; }
+        .restaurant-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 모바일 기본 1열 */
+            gap: 25px;
+        }
+        @media (min-width: 768px) {
+            .restaurant-grid { grid-template-columns: repeat(2, 1fr); }
+            .restaurant-grid-container { padding: 0 10%; }
+        }
+
+        /* (수정) <a> 태그로 감싸진 카드 */
+        .restaurant-card {
+            background-color: #fff; border: 1px solid #e9ecef;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            display: block; /* a 태그를 block 요소로 */
+        }
+        .restaurant-card:hover { transform: translateY(-5px); }
+        .restaurant-card img {
+            width: 100%; height: 220px; object-fit: cover;
+            /* (신규) 이미지가 깨졌을 때 배경색 */
+            background-color: #f8f9fa;
+        }
+        .restaurant-card .card-content { padding: 20px; }
+        .restaurant-card .card-title {
+            font-size: 22px; font-weight: bold; margin-bottom: 8px; color: #343a40;
+        }
+        .restaurant-card .card-category {
+            font-size: 14px; color: #868e96; margin-bottom: 12px;
+        }
+        .restaurant-card .card-address {
+            font-size: 15px; color: #495057; margin-bottom: 15px;
+            /* (신규) 주소가 길어지면 ... 처리 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .restaurant-card .card-rating {
+            font-size: 18px; font-weight: bold; color: #c19041;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-footer-container">
+    <header class="header-footer-content">
+        <a th:href="@{/}" class="logo">
+            🍽️ <span class="logo-yummy">おか</span><span class="logo-log">わり</span>
+        </a>
+
+        <div class="auth-buttons" th:fragment="auth-buttons-fragment">
+
+            <div th:if="${loggedInUser}">
+                    <span class="user-greeting" th:text="|${loggedInUser.nickname}님 환영합니다!|">
+                        김신한님 환영합니다!
+                    </span>
+                <button type="button" th:onclick="|location.href='@{/mypage}'|">마이페이지</button>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit">로그아웃</button>
+                </form>
+            </div>
+
+            <div th:unless="${loggedInUser}">
+                <button type="button" th:onclick="|location.href='@{/login}'|">로그인</button>
+                <button type="button" th:onclick="|location.href='@{/signup}'|">회원가입</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+<main class="main-container">
+    <div class="search-bar">
+        <input type="text" placeholder="맛집 이름, 메뉴, 지역을 검색해보세요!">
+    </div>
+
+    <div class="category-filters">
+        <a th:href="@{/(category='전체')}"
+           th:classappend="${activeCategory == '전체'} ? 'active' : ''">전체</a>
+
+        <a th:href="@{/(category='한식')}"
+           th:classappend="${activeCategory == '한식'} ? 'active' : ''">한식</a>
+
+        <a th:href="@{/(category='중식')}"
+           th:classappend="${activeCategory == '중식'} ? 'active' : ''">중식</a>
+
+        <a th:href="@{/(category='일식')}"
+           th:classappend="${activeCategory == '일식'} ? 'active' : ''">일식</a>
+
+        <a th:href="@{/(category='이탈리아')}"
+           th:classappend="${activeCategory == '이탈리아'} ? 'active' : ''">이탈리안</a>
+
+        <a th:href="@{/(category='카페')}"
+           th:classappend="${activeCategory == '카페'} ? 'active' : ''">카페</a>
+
+        <a th:href="@{/(category='멕시코')}"
+           th:classappend="${activeCategory == '멕시코'} ? 'active' : ''">멕시코</a>
+    </div>
+
+    <div class="restaurant-grid-container">
+        <div class="restaurant-grid">
+
+            <div th:each="restaurant : ${restaurants}">
+
+                <a th:href="@{/restaurants/{id}(id=${restaurant.id})}" class="restaurant-card">
+
+                    <img th:src="@{${restaurant.imageUrl}}"
+                         th:alt="${restaurant.name}"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x400/04448b/c19041?text=Image+Ready';">
+
+                    <div class="card-content">
+                        <h2 class="card-title" th:text="${restaurant.name}">맛집 이름</h2>
+                        <p class="card-category" th:text="${restaurant.category}">카테고리</p>
+                        <p class="card-address" th:text="${#strings.replace(restaurant.address, '경기 용인시 처인구 모현읍 ', '')}">
+                            주소
+                        </p>
+                        <p class="card-rating">⭐ 4.5</p>
+                    </div>
+                </a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(restaurants)}">
+                <p style="text-align: center; font-size: 16px; color: #6c757d;">
+                    해당 카테고리의 맛집이 없습니다.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<div class="footer-container">
+    <footer class="footer-content">
+        <p>&copy; 2025 おかわり (Okawari). All Rights Reserved.</p>
+    </footer>
+</div>
+
+</body>
+</html>

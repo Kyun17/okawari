@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おかわり - 회원가입</title>
+
+    <!-- (스타일은 login.html과 동일) -->
+    <style>
+        /* --- 1. 공통 스타일 --- */
+        body, h1, h2, p, ul, li, form, button, input, select, textarea {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa; color: #212529; min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+        a { color: #04448b; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* --- 2. 헤더 / 푸터 공통 컨테이너 --- */
+        .header-footer-container {
+            width: 100%; background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .footer-container {
+            width: 100%; background-color: #ffffff;
+            border-top: 1px solid #dee2e6; margin-top: auto;
+        }
+        .header-footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 30px 20px;
+            text-align: center; color: #adb5bd; font-size: 14px;
+        }
+
+        /* --- 3. 헤더 (로고, 버튼) --- */
+        .header .logo {
+            font-size: 28px; font-weight: bold; text-decoration: none; outline: none;
+        }
+        .header .logo .logo-yummy { color: #04448b; }
+        .header .logo .logo-log { color: #c19041; }
+        .header .auth-buttons button {
+            background-color: transparent; border: 1px solid #04448b; color: #04448b;
+            padding: 8px 16px; border-radius: 5px; cursor: pointer;
+            margin-left: 10px; font-size: 14px; font-weight: 500;
+        }
+        .header .auth-buttons button:hover { background-color: #04448b; color: #fff; }
+
+        /* --- 4. 메인 컨텐츠 (회원가입 폼) --- */
+        main.signup-container {
+            flex-grow: 1; display: flex; align-items: center;
+            justify-content: center; padding: 40px 20px;
+        }
+        .signup-form {
+            width: 100%; max-width: 400px; padding: 30px;
+            background: #fff; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        /* (신규) 폼 타이틀 영역 (뒤로가기 버튼 포함) */
+        .form-title-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative; /* 중앙 정렬 기준 */
+        }
+        .back-btn {
+            font-size: 24px; font-weight: bold; color: #868e96;
+            text-decoration: none; cursor: pointer;
+            padding-right: 15px;
+        }
+        .back-btn:hover { color: #04448b; }
+        .form-title {
+            font-size: 24px; font-weight: bold; color: #04448b;
+            /* (신규) 뒤로가기 버튼이 있어도 중앙에 위치하도록 수정 */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block; font-weight: 500;
+            margin-bottom: 5px; font-size: 14px;
+        }
+        .form-group input {
+            width: 100%; padding: 12px; border: 1px solid #ced4da;
+            border-radius: 5px; box-sizing: border-box; font-size: 16px;
+        }
+        .submit-btn {
+            width: 100%; padding: 12px; background-color: #04448b; color: #fff;
+            border: none; border-radius: 5px; cursor: pointer;
+            font-size: 16px; font-weight: bold; margin-top: 10px;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+
+        /* (신규) 에러 메시지 스타일 */
+        .error-message {
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            padding: 10px 15px; border-radius: 5px;
+            margin-bottom: 15px; text-align: center; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 1. 헤더 -->
+<div class="header-footer-container">
+    <header class="header-footer-content">
+        <a th:href="@{/}" class="logo">
+            🍽️ <span class="logo-yummy">おか</span><span class="logo-log">わり</span>
+        </a>
+        <div class="auth-buttons">
+            <!-- 회원가입 페이지이므로 '로그인' 버튼 표시 -->
+            <button type="button" th:onclick="|location.href='@{/login}'|">로그인</button>
+        </div>
+    </header>
+</div>
+
+<!-- 2. 메인 컨텐츠 (회원가입 폼) -->
+<main class="signup-container">
+
+    <div class="signup-form">
+        <div class="form-title-wrapper">
+            <!-- 뒤로가기 버튼 -->
+            <a href="javascript:history.back()" class="back-btn">&lt;</a>
+            <h2 class="form-title">회원가입</h2>
+        </div>
+
+        <!--
+          - th:object="${signupRequest}" : 컨트롤러에서 받은 빈 DTO와 폼을 연결
+        -->
+        <form th:action="@{/signup}" method="post" th:object="${signupRequest}">
+
+            <!-- (신규) 회원가입 실패 시 에러 메시지 표시 -->
+            <div th:if="${error}" class="error-message" th:text="${error}">
+                (에러 메시지가 여기에 표시됩니다)
+            </div>
+
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="email" id="email" th:field="*{email}" placeholder="email@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" th:field="*{password}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="passwordConfirm">비밀번호 확인</label>
+                <input type="password" id="passwordConfirm" th:field="*{passwordConfirm}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nickname">닉네임</label>
+                <input type="text" id="nickname" th:field="*{nickname}" required>
+            </div>
+
+            <button type="submit" class="submit-btn">회원가입 완료</button>
+        </form>
+
+    </div>
+</main>
+
+<!-- 3. 푸터 -->
+<div class="footer-container">
+    <footer class="footer-content">
+        <p>&copy; 2025 おかわり (Okawari). All Rights Reserved.</p>
+    </footer>
+</div>
+
+</body>
+</html>
