@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="|おかわり - ${restaurant.name}|">おかわり - 상세</title>
+
+    <style>
+        /* --- 1. 공통 스타일 (main.html과 동일) --- */
+        body, h1, h2, h3, h4, p, ul, li, form, button, input, select, textarea {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa; color: #212529; min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+        a { color: #04448b; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        button { cursor: pointer; }
+
+        /* --- 2. 헤더 / 푸터 (main.html과 동일) --- */
+        .header-footer-container {
+            width: 100%; background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6; z-index: 10;
+        }
+        .footer-container {
+            width: 100%; background-color: #ffffff;
+            border-top: 1px solid #dee2e6; margin-top: auto;
+        }
+        .header-footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-content {
+            max-width: 1200px; margin: 0 auto; padding: 30px 20px;
+            text-align: center; color: #adb5bd; font-size: 14px;
+        }
+        .header .logo {
+            font-size: 28px; font-weight: bold; text-decoration: none; outline: none;
+        }
+        .header .logo .logo-yummy { color: #04448b; }
+        .header .logo .logo-log { color: #c19041; }
+        .header .auth-buttons { display: flex; align-items: center; gap: 10px; }
+        .header .auth-buttons button {
+            background-color: transparent; border: 1px solid #04448b; color: #04448b;
+            padding: 8px 16px; border-radius: 5px; font-size: 14px; font-weight: 500;
+        }
+        .header .auth-buttons button:hover { background-color: #04448b; color: #fff; }
+        .header .auth-buttons form { margin: 0; }
+        .header .user-greeting { font-size: 15px; font-weight: 500; }
+
+        /* --- 3. 상세 페이지 컨텐츠 --- */
+        /* 이미지 배너 */
+        .restaurant-image-banner {
+            width: 100%;
+            height: 350px;
+            background-color: #e9ecef;
+        }
+        .restaurant-image-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 컨텐츠 섹션 (정보, 리뷰) */
+        .content-section {
+            width: 100%;
+            background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 30px 0;
+        }
+        .content-section-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .content-section.reviews {
+            background-color: #f8f9fa;
+        }
+
+        /* 가게 정보 섹션 (첫 번째) */
+        .restaurant-details {
+            margin-top: -30px; /* 이미지 배너와 겹치기 */
+            position: relative;
+            background-color: #fff;
+            padding-top: 30px;
+            /* 겹침 효과를 위해 radius 유지 */
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .restaurant-details .category-tag {
+            display: inline-block;
+            background-color: #04448b;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .restaurant-details h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #212529;
+        }
+        .restaurant-details p {
+            font-size: 16px;
+            color: #495057;
+            margin-bottom: 8px;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+        }
+        .restaurant-details p span { margin-right: 8px; }
+        .restaurant-details .rating {
+            font-size: 20px;
+            font-weight: bold;
+            color: #c19041;
+            margin-top: 15px;
+        }
+
+        /* 리뷰 섹션 (두 번째) */
+        .review-section h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+        .review-list {
+            padding-left: 0;
+            list-style-type: none;
+        }
+        /* 리뷰가 없을 때 */
+        .no-reviews {
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            color: #868e96;
+        }
+        .review-list li {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .review-author {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .review-date {
+            font-size: 13px;
+            color: #868e96;
+            padding-top: 3px;
+        }
+        .review-rating {
+            font-size: 15px;
+            color: #c19041;
+            margin-bottom: 10px;
+        }
+        .review-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .review-body p.review-text {
+            flex-grow: 1;
+            font-size: 15px;
+            color: #343a40;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .review-actions {
+            flex-shrink: 0;
+            display: flex;
+            gap: 10px;
+        }
+        .review-actions button {
+            background: none;
+            border: none;
+            color: #868e96;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 0;
+        }
+        .review-actions button:hover {
+            color: #04448b;
+        }
+        .review-actions button.delete:hover {
+            color: #dc3545;
+        }
+
+        /* 리뷰 작성 폼 */
+        .review-form {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        #review-form-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block; font-weight: 500; margin-bottom: 5px;
+        }
+        .form-group select,
+        .form-group textarea {
+            width: 100%; padding: 10px;
+            border: 1px solid #ced4da; border-radius: 5px;
+            font-size: 14px; font-family: inherit;
+        }
+        .submit-review-btn {
+            background-color: #04448b; color: white;
+            padding: 12px 20px; border: none; border-radius: 5px;
+            font-size: 16px; font-weight: bold; width: 100%;
+        }
+        .submit-review-btn:hover { opacity: 0.9; }
+
+        /* 로그인 안했을 때 리뷰 작성창 가리기 */
+        .review-login-prompt {
+            padding: 30px 20px;
+            text-align: center;
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        .review-login-prompt p {
+            font-size: 15px; color: #495057; margin-bottom: 15px;
+        }
+        .review-login-prompt button {
+            background-color: #04448b; color: #fff;
+            padding: 10px 16px; border: none; border-radius: 5px;
+            font-size: 15px; font-weight: 500;
+        }
+
+        /* --- 4. 팝업 (모달) 스타일 --- */
+        .modal-overlay {
+            display: none; /* 평소에는 숨김 */
+            position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; padding: 30px;
+            border: 1px solid #888; border-radius: 10px;
+            width: 90%; max-width: 500px; /* 모달 너비 */
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-close {
+            color: #aaa; position: absolute;
+            top: 10px; right: 20px;
+            font-size: 28px; font-weight: bold;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #000; text-decoration: none; cursor: pointer;
+        }
+        .modal-content h3 {
+            font-size: 20px; font-weight: 600; margin-bottom: 20px;
+        }
+        .modal-content .submit-review-btn { width: 100%; }
+        /* 삭제 확인 모달 */
+        .modal-content .delete-confirm-text {
+            font-size: 15px; line-height: 1.6; margin-bottom: 20px;
+        }
+        .modal-content .modal-buttons {
+            display: flex; gap: 10px; justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .modal-content .modal-buttons button {
+            padding: 10px 16px; border: none; border-radius: 5px;
+            font-size: 15px; font-weight: 500;
+        }
+        .modal-content .modal-buttons .btn-cancel {
+            background-color: #6c757d; color: white;
+        }
+        .modal-content .modal-buttons .btn-delete {
+            background-color: #dc3545; color: white;
+        }
+
+        /* (신규) 성공/에러 메시지 알림창 */
+        .alert-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-footer-container">
+    <header class="header-footer-content">
+        <a th:href="@{/}" class="logo">
+            🍽️ <span class="logo-yummy">おか</span><span class="logo-log">わり</span>
+        </a>
+
+        <div th:replace="~{main :: auth-buttons-fragment}">
+            <div class="auth-buttons">
+                <button type="button">로그인</button>
+                <button type="button">회원가입</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+<div class="restaurant-image-banner">
+    <img th:src="@{${restaurant.imageUrl}}" th:alt="${restaurant.name}"
+         onerror="this.onerror=null; this.src='https://placehold.co/1200x350/04448b/c19041?text=Image+Ready';">
+</div>
+
+<div class="content-section restaurant-details">
+    <div class="content-section-inner">
+        <span class="category-tag" th:text="${restaurant.category}">한식</span>
+        <h1 th:text="${restaurant.name}">도톰 숯불구이</h1>
+        <p><span>📍</span> <span th:text="${restaurant.address}">서울시 강남구 테헤란로 123</span></p>
+        <p><span>📞</span> <span th:text="${restaurant.phoneNumber}">02-1111-2222</span></p>
+
+        <div class="rating">⭐ 4.8 (리뷰 <span th:text="${#lists.size(reviews)}">0</span>개)</div>
+    </div>
+</div>
+
+<div class="content-section reviews">
+    <div class="content-section-inner">
+
+        <div th:if="${successMessage}" class="alert-message alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert-message alert-error" th:text="${errorMessage}"></div>
+
+        <h2 id="review-list-title">리뷰 (<span th:text="${#lists.size(reviews)}">0</span>)</h2>
+
+        <div th:if="${#lists.isEmpty(reviews)}" class="no-reviews">
+            <p>아직 작성된 리뷰가 없습니다.<br>첫 번째 리뷰를 남겨주세요!</p>
+        </div>
+
+        <ul class="review-list" th:unless="${#lists.isEmpty(reviews)}">
+
+            <li th:each="review : ${reviews}">
+                <div class="review-header">
+                    <div>
+                        <span class="review-author" th:text="${review.nickname}">김신한</span>
+                        <span class="review-date" th:text="${review.createdAtFormatted}">2025.11.07 10:30</span>
+                    </div>
+                    <div class="review-actions" th:if="${review.isOwner}">
+
+                        <button type="button" class="edit"
+                                th:attr="data-review-id=${review.reviewId}, data-rating=${review.rating}, data-content=${review.content}"
+                                th:onclick="openEditModal(this)">
+                            [수정]
+                        </button>
+                        <button type="button" class="delete"
+                                th:onclick="|openDeleteModal(${review.reviewId})|">
+                            [삭제]
+                        </button>
+                    </div>
+                </div>
+                <div class="review-rating" th:switch="${review.rating}">
+                    <span th:case="1">⭐</span>
+                    <span th:case="2">⭐⭐</span>
+                    <span th:case="3">⭐⭐⭐</span>
+                    <span th:case="4">⭐⭐⭐⭐</span>
+                    <span th:case="5">⭐⭐⭐⭐⭐</span>
+                </div>
+                <div class="review-body">
+                    <p class="review-text" th:text="${review.content}">정말 맛있습니다! 분위기도 최고예요.</p>
+                </div>
+            </li>
+        </ul>
+
+        <h2 id="review-form-title">리뷰 작성하기</h2>
+
+        <div th:unless="${loggedInUser}" class="review-login-prompt">
+            <p>리뷰를 작성하려면 로그인이 필요합니다.</p>
+            <button type="button" th:onclick="|location.href='@{/login}'|">로그인 페이지로 이동</button>
+        </div>
+
+        <div th:if="${loggedInUser}" class="review-form">
+            <form id="reviewCreateForm"
+                  th:action="@{/restaurants/{id}/reviews(id=${restaurant.id})}"
+                  th:object="${newReviewRequest}" method="post">
+
+                <div class="form-group">
+                    <label for="review-rating-input">별점</label>
+                    <select id="review-rating-input" th:field="*{rating}">
+                        <option value="5">⭐⭐⭐⭐⭐ (5점)</option>
+                        <option value="4">⭐⭐⭐⭐ (4점)</option>
+                        <option value="3">⭐⭐⭐ (3점)</option>
+                        <option value="2">⭐⭐ (2점)</option>
+                        <option value="1">⭐ (1점)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="review-text">리뷰 내용</label>
+                    <textarea id="review-text" rows="4" th:field="*{content}"
+                              placeholder="방문 후기를 남겨주세요 (필수)" required></textarea>
+                </div>
+                <button type="submit" class="submit-review-btn">리뷰 등록</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<div class="footer-container">
+    <footer class="footer-content">
+        <p>&copy; 2025 おかわり (Okawari). All Rights Reserved.</p>
+    </footer>
+</div>
+
+
+<div id="editReviewModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('editReviewModal')">&times;</span>
+        <h3>리뷰 수정하기</h3>
+
+        <form id="reviewEditForm"
+              th:action="@{/reviews/0/edit}"
+              th:object="${updateReviewRequest}" method="post">
+
+            <input type="hidden" name="restaurantId" th:value="${restaurant.id}" />
+
+            <div class="form-group">
+                <label for="edit-review-rating">별점</label>
+                <select id="edit-review-rating" th:field="*{rating}">
+                    <option value="5">⭐⭐⭐⭐⭐ (5점)</option>
+                    <option value="4">⭐⭐⭐⭐ (4점)</option>
+                    <option value="3">⭐⭐⭐ (3점)</option>
+                    <option value="2">⭐⭐ (2점)</option>
+                    <option value="1">⭐ (1점)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-review-content">리뷰 내용</label>
+                <textarea id="edit-review-content" rows="4" th:field="*{content}" required></textarea>
+            </div>
+            <button type="submit" class="submit-review-btn">리뷰 수정</button>
+        </form>
+    </div>
+</div>
+
+<div id="deleteReviewModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('deleteReviewModal')">&times;</span>
+        <h3>리뷰 삭제</h3>
+        <p class="delete-confirm-text">
+            정말로 이 리뷰를 삭제하시겠습니까?<br>
+            삭제된 데이터는 복구할 수 없습니다.
+        </p>
+
+        <form id="reviewDeleteForm"
+              th:action="@{/reviews/0/delete}"
+              th:object="${deleteReviewRequest}" method="post">
+
+            <input type="hidden" name="restaurantId" th:value="${restaurant.id}" />
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeModal('deleteReviewModal')">취소</button>
+                <button type="submit" class="btn-delete">삭제</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // 공통 모달 닫기
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // (수정!) 1. "수정" 팝업 열기 (Thymeleaf 보안 에러 해결)
+    function openEditModal(buttonElement) { // 'this'(버튼 자신)를 받음
+        const modal = document.getElementById('editReviewModal');
+        const form = document.getElementById('reviewEditForm');
+
+        // (수정) data-* 속성에서 안전하게 값을 읽어옴
+        const reviewId = buttonElement.getAttribute('data-review-id');
+        const rating = buttonElement.getAttribute('data-rating');
+        const content = buttonElement.getAttribute('data-content');
+
+        // (중요) 폼의 action URL을 동적으로 변경 (예: /reviews/123/edit)
+        form.action = '/reviews/' + reviewId + '/edit';
+
+        // 팝업 안의 폼에, 클릭한 리뷰의 기존 데이터를 채워넣기
+        document.getElementById('edit-review-rating').value = rating;
+        document.getElementById('edit-review-content').value = content;
+
+        modal.style.display = 'flex';
+    }
+
+    // 2. "삭제" 팝업 열기
+    function openDeleteModal(reviewId) {
+        const modal = document.getElementById('deleteReviewModal');
+        const form = document.getElementById('reviewDeleteForm');
+
+        // (중요) 폼의 action URL을 동적으로 변경 (예: /reviews/123/delete)
+        form.action = '/reviews/' + reviewId + '/delete';
+
+        modal.style.display = 'flex';
+    }
+
+    // 3. 모달 바깥쪽 어두운 영역 클릭 시 닫기
+    window.addEventListener("click", (event) => {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
