@@ -26,4 +26,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      */
     @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.id = :reviewId")
     Optional<Review> findByIdWithUser(@Param("reviewId") Long reviewId);
+
+    /**
+     * 특정 맛집(restaurantId)에 해당하는 리뷰 갯수 집계
+     */
+    long countByRestaurantId(Long restaurantId);
+
+    /**
+     *  특정 맛집(restaurantId)에 해당하는 리뷰 평점 집계
+     */
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.restaurant.id = :restaurantId")
+    Double findAvgRatingByRestaurantId(@Param("restaurantId") Long restaurantId);
 }

@@ -1,0 +1,109 @@
+/* 모든 페이지에서 공통으로 사용하는 css
+   header, footer, logo, 버튼, alert 등의 스타일 적용
+*/
+
+/* === 0. Reset & Base === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+a { text-decoration: none; color: #04448b;; }
+
+/* === 1. Header / Footer 공통 === */
+.header-footer-container {
+    width: 100%;
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+}
+.header-footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.footer-container {
+    width: 100%;
+    background-color: #fff;
+    border-top: 1px solid #dee2e6;
+    margin-top: auto;
+}
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    text-align: center;
+    color: #adb5bd;
+    font-size: 14px;
+}
+
+/* === 2. Logo === */
+.logo {
+    font-size: 23px;
+    font-weight: bold;
+    text-decoration: none;
+    line-height: 1.2;
+}
+.logo .logo-yummy {
+    color: #04448b;
+    font-family: "Noto Sans JP", sans-serif;
+}
+.logo .logo-log {
+    color: #c19041;
+    font-family: "Noto Sans JP", sans-serif;
+    margin-left: 40px;
+}
+
+/* === 3. Auth Buttons (공통 로그인/회원가입/로그아웃 버튼) === */
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.auth-buttons button {
+    background-color: #ffffff;
+    border: 1.5px solid #04448b;
+    color: #04448b;
+    padding: 8px 14px;
+    margin-left: 7px;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.auth-buttons button:hover {
+    background-color: #04448b;
+    color: #ffffff;
+}
+.auth-buttons form { margin: 0; }
+
+/* === 4. User Greeting === */
+.user-greeting {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* === 5. Alert Message (공통 성공/에러 알림창) === */
+.alert-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 15px;
+}
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+.alert-error {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
