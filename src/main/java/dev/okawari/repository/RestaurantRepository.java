@@ -17,4 +17,11 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
      */
     List<Restaurant> findByCategory(String category);
 
+    /**
+     * 맛집 이름으로 맛집 목록을 검색합니다.
+     * JPA가 메서드 이름을 분석해 "SELECT * FROM RESTAURANTS WHERE name = ?" 쿼리를 자동 생성합니다.
+     * @param keyword (예: "파", "파스타", "스타") LIKE '%키워드%' 형식으로 검사
+     * @return 해당 검색어의 맛집 리스트
+     */
+    List<Restaurant> findByNameContainingIgnoreCase(String keyword);
 }

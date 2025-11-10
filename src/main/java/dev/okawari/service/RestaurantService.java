@@ -10,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,4 +67,41 @@ public class RestaurantService {
                 })
                 .collect(Collectors.toList());
     }
+
+    /**
+     * (신규) 상세 페이지용: 특정 맛집의 리뷰 개수 및 평균 평점을 계산합니다.
+     */
+    public Map<String, Object> reviewsRating (Long restaurantId) {
+        // 1. 해당 맛집의 전체 리뷰 개수 조회
+        long count = reviewRepository.countByRestaurantId(restaurantId);
+
+        // 2. 평균 평점 조회 (null 반환 가능)
+        Double avg = reviewRepository.findAvgRatingByRestaurantId(restaurantId);
+
+        // 3. 평균이 null일 경우 0.0으로 처리, 소수 1자리 반올림
+        double rounded = Math.round((avg != null ? avg : 0.0) * 10.0) / 10.0;
+
+        // 4. 결과를 Map에 담아 반환
+        Map<String, Object> result = new HashMap<>();
+        result.put("reviewCount", count);
+        result.put("avgRating", rounded);
+        return result;
+    }
+
+    /**
+     * (신규) 맛집 이름으로 검색합니다.
+     * 입력한 키워드가 이름에 포함된 모든 맛집을 조회하며,
+     * 검색어가 없을 경우 빈 맛집 목록을 반환합니다.
+     */
+    public List<Restaurant> searchByName(String keyword) {
+
+        // 1. 검색어가 비어 있거나 공백만 있는 경우 → 빈 리스트 반환
+        if (keyword == null || keyword.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        // 2. 검색어가 존재하는 경우 → 이름에 검색어가 포함된 맛집 조회 (대소문자 구분 X)
+        return restaurantRepository.findByNameContainingIgnoreCase(keyword.trim());
+    }
+
 }
